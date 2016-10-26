@@ -1,0 +1,187 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+
+<configuration>
+    <!--general-->
+    <property>
+        <name>firewallindonesia.read.partitions</name>
+        <value>45</value>
+    </property>
+    <property>
+        <name>firewallindonesia.status.true</name>
+        <value>1</value>
+    </property>
+    <property>
+        <name>firewallindonesia.name.delimiter</name>
+        <value>_</value>
+    </property>
+    <property>
+        <name>firewallindonesia.file.linedelimiter</name>
+        <value>\t</value>
+    </property>
+    <property>
+        <name>firewallindonesia.file.textdelimiter</name>
+        <value>,</value>
+    </property>
+    <property>
+        <name>firewallindonesia.dateformat</name>
+        <value>MM/dd/yyyy HH:mm:ss</value>
+    </property>
+
+    <!--hbaseinterface-->
+    <property>
+        <name>hbaseinterface.read.cacheblocks</name>
+        <value>false</value>
+    </property>
+    <property>
+        <name>hbaseinterface.read.caching</name>
+        <value>1000</value>
+    </property>
+
+    <!--data preparation-->
+    <property>
+        <name>datapreparation.profiles.dir</name>
+        <value>/firewallid/bigdataapps/res/profiles/</value>
+    </property>
+
+    <!--crawling-->
+    <property>
+        <name>crawling.streaming.duration</name>
+        <value>1000</value>
+        <description>Streaming duration in milliseconds</description>
+    </property>
+
+    <!--cleaning-->
+    <property>
+        <name>cleaning.resources.dirs</name>
+        <value>/firewallid/bigdataapps/res/indonesiannlp/data,/firewallid/bigdataapps/res/indonesiannlp/resource</value>
+    </property>
+
+    <!--classification-->
+    <property>
+        <name>classification.trainingdata.timeoutdownload</name>
+        <value>5</value>
+        <description>In seconds</description>
+    </property>
+    <property>
+        <name>classification.trainingdata.source</name>
+        <value>trainingdata-v2-source.csv</value>
+    </property>
+    <property>
+        <name>classification.trainingdata.resource</name>
+        <value>trainingdata-v2.csv</value>
+    </property>
+    <property>
+        <name>classification.trainingdata.path</name>
+        <value>/firewallid/classification/trainingdata/trainingdata-v2.csv</value>
+    </property>
+    <property>
+        <name>classification.trainingdata.dataposition</name>
+        <value>3</value>
+    </property>
+    <property>
+        <name>classification.trainingdata.labelposition</name>
+        <value>1</value>
+    </property>
+    <property>
+        <name>classification.idf.mindocfreq</name>
+        <value>100</value>
+    </property>
+    <property>
+        <name>classification.classifier.labels</name>
+        <value>judionline,narkoba,pornografi,prostitusi,sara,radikalisme,terorisme,separatisme</value>
+    </property>
+    <property>
+        <name>classification.classifier.labels.none</name>
+        <value>none</value>
+    </property>
+    <property>
+        <name>classification.classifier.modelpath</name>
+        <value>/firewallid/classification/model</value>
+    </property>
+    <property>
+        <name>classification.svm.iterations</name>
+        <value>100</value>
+    </property>
+    <property>
+        <name>classification.featureextraction.featureindicespath</name>
+        <value>/firewallid/classification/trainingdata/featureindices</value>
+    </property>
+
+
+    <!--term cloud-->
+    <property>
+        <name>termcloud.titletfidf.folder</name>
+        <value>/firewallid/termcloud/titletfidf</value>
+    </property>
+    <property>
+        <name>termcloud.output.folder</name>
+        <value>/firewallid/termcloud/output</value>
+    </property>
+    <property>
+        <name>termcloud.output.file.suffixname</name>
+        <value>termcloud.csv</value>
+    </property>
+    <property>
+        <name>termcloud.output.file.allname</name>
+        <value>all</value>
+    </property>
+    <property>
+        <name>termcloud.output.topn</name>
+        <value>100</value>
+    </property>
+
+    <!--sentiment analysis-->
+    <property>
+        <name>sentimentanalysis.swn.file</name>
+        <value>IDSentiWordNet-1.0.txt</value>
+    </property>
+
+    <!--count-->
+    <property>
+        <name>count.database.driverclass</name>
+        <value>com.mysql.jdbc.Driver</value>
+    </property>
+    <property>
+        <name>count.database.table.monitoring</name>
+        <value>monitoring_log</value>
+    </property>
+    <property>
+        <name>count.database.table.monitoring.columns</name>
+        <value>task_id,n_crawling,n_cleaning,n_classification,n_analysis,type</value>
+    </property>
+    <property>
+        <name>count.database.table.host</name>
+        <value>website_list</value>
+    </property>
+    <property>
+        <name>count.database.table.host.columns</name>
+        <value>id,task_id,domain,user_id</value>
+    </property>
+    <property>
+        <name>count.database.table.classification</name>
+        <value>classification_log</value>
+    </property>
+    <property>
+        <name>count.database.table.classification.columns</name>
+        <value>website_id,task_id,user_id</value>
+    </property>
+    <property>
+        <name>count.database.table.sentiment</name>
+        <value>sentimen</value>
+    </property>
+    <property>
+        <name>count.database.table.sentiment.columns</name>
+        <value>website_id,category_name</value>
+    </property>
+
+    <!--util-->
+    <property>
+        <name>firewallindonesia.util.download.retries</name>
+        <value>20</value>
+    </property>
+    <property>
+        <name>firewallindonesia.util.download.timeout</name>
+        <value>5</value>
+    </property>
+</configuration>

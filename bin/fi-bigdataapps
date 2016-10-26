@@ -1,0 +1,66 @@
+#!/bin/bash
+
+# resolve links - $0 may be a softlink
+THIS="$0"
+while [ -h "$THIS" ]; do
+	ls=`ls -ld "$THIS"`
+	link=`expr "$ls" : '.*-> \(.*\)$'`
+	if expr "$link" : '.*/.*' > /dev/null; then
+		THIS="$link"
+	else
+		THIS=`dirname "$THIS"`/"$link"
+	fi
+done
+
+if [ $# = 0 ]; then
+  echo "Usage: fi-bigdataapps COMMAND"
+  echo "where COMMAND is one of:"
+  echo " twittercrawler"
+  exit -1;
+fi
+
+# get arguments
+COMMAND=$1
+shift
+
+# some directories
+THIS_DIR="`dirname "$THIS"`"
+FI_HOME="`cd "$THIS_DIR/.." ; pwd`"
+
+# firewall-indonesia jar
+for f in "$FI_HOME"/firewallid*.jar; do
+	FI_JAR="$f";
+done
+
+if [ "$COMMAND" = "websitecrawler" ] ; then
+	CLASS=""
+elif [ "$COMMAND" = "twittercrawler" ]; then
+	CLASS=com.firewallid.crawling.TwitterCrawler
+elif [ "$COMMAND" = "facebookcrawler" ]; then
+	CLASS=com.firewallid.crawling.FacebookCrawler
+elif [ "$COMMAND" = "cleaner" ]; then
+	CLASS=com.firewallid.cleaning.Cleaner
+elif [ "$COMMAND" = "trainingdatabuilder" ]; then
+	CLASS=com.firewallid.classification.TrainingDataBuilder
+elif [ "$COMMAND" = "classifierbuilder" ]; then
+	CLASS=com.firewallid.classification.ClassifierBuilder
+elif [ "$COMMAND" = "classifier" ]; then
+	CLASS=com.firewallid.classification.Classifier
+elif [ "$COMMAND" = "featureindicescreator" ]; then
+	CLASS=com.firewallid.classification.FeatureIndicesCreator
+else
+	echo "Command not found"
+	exit -1;
+fi
+
+# check that spark-submit can be found on the path
+ if [ $(which spark-submit | wc -l ) -eq 0 ]; then
+    echo "Can't find spark-submit. Add SPARK_HOME/bin to the path"
+    exit -1;
+ fi
+
+# Spark's arguments
+SPARK_MASTER="localhost"
+SPARK_ARGS="spark-submit --master spark://$SPARK_MASTER:7077 --driver-memory 128m --executor-memory 512m --class"
+
+exec $SPARK_ARGS $CLASS "$FI_JAR" "$@"

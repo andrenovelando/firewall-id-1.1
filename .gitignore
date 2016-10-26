@@ -1,0 +1,9 @@
+/src/main/resources/auth.xml
+/src/main/resources/trainingdata*
+/src/main/resources/env-site-cluster/
+/src/main/resources/env-site-local/
+/src/main/resources/*-site.xml
+
+/target/
+
+firewall*.jar

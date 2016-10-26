@@ -1,0 +1,76 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+
+<configuration>
+    <!--crawl-->
+    <property>
+        <name>table.crawl.suffixname</name>
+        <value>webpage</value>
+    </property>
+    <property>
+        <name>table.crawl.crawlingcolumn</name>
+        <value>p:cr</value>
+    </property>
+    <property>
+        <name>table.crawl.cleaningcolumn</name>
+        <value>p:cl</value>
+    </property>
+    <property>
+        <name>table.crawl.classificationcolumn</name>
+        <value>p:cls</value>
+    </property>
+    <property>
+        <name>table.crawl.classifiedcolumn</name>
+        <value>p:cld</value>
+    </property>
+    <property>
+        <name>table.crawl.termcloudstatuscolumn</name>
+        <value>p:tcs</value>
+    </property>
+    <property>
+        <name>table.crawl.hostcolumn</name>
+        <value>f:dom</value>
+    </property>
+
+    <!--comment-->
+    <property>
+        <name>table.comment.suffixname</name>
+        <value>_comment</value>
+    </property>
+    <property>
+        <name>table.comment.familys</name>
+        <value></value>
+    </property>
+    <property>
+        <name>table.comment.columns</name>
+        <value>_webpage</value>
+        <description>0:user 1:text 2:depth 3:replyto 4:classification 5:url 6:domain</description>
+    </property>
+    <property>
+        <name>table.comment.classificationcolumn</name>
+        <value>a:clf</value>
+    </property>
+    <property>
+        <name>table.comment.sentimentcolumn</name>
+        <value>a:st</value>
+    </property>
+    <property>
+        <name>table.comment.textcolumn</name>
+        <value></value>
+    </property>
+    <property>
+        <name>table.comment.hostcolumn</name>
+        <value>cs:dom</value>
+    </property>
+
+    <!--comment wrapper-->
+    <property>
+        <name>commentwrapper.website.commentsector.class</name>
+        <value>comment</value>
+    </property>
+    <property>
+        <name>commentwrapper.website.commentblock.class</name>
+        <value>(?i)(comment|thread|body)</value>
+        <description>Regex format acceptable</description>
+    </property>
+</configuration>
