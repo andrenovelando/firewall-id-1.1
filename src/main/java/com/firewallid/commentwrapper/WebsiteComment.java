@@ -5,58 +5,60 @@
  */
 package com.firewallid.commentwrapper;
 
+import com.firewallid.base.Base;
 import com.firewallid.io.HBaseRead;
 import com.firewallid.io.HBaseTableUtils;
 import com.firewallid.io.HBaseWrite;
-import com.firewallid.util.FIConfiguration;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import scala.Tuple2;
 
 /**
  *
  * @author andrenovelando@gmail.com
  */
-public class WebsiteComment {
-
-    public static final Logger LOG = LoggerFactory.getLogger(WebsiteComment.class);
+public class WebsiteComment extends Base {
 
     public static final String STATUSTRUE = "firewallindonesia.status.true";
+    public static final String NAME_DELIMITER = "firewallindonesia.name.delimiter";
 
     public static final String CRAWL_SUFFIXNAME = "table.crawl.suffixname";
-    public static final String CRAWL_COLUMNS = "table.crawl.columns"; // 0:html 1:comment_status 2:url 3:domain 4:classification 5:classified
+    public static final String CRAWL_HTML_COLUMN = "table.crawl.htmlcolumn";
+    public static final String CRAWL_COMMENTWRAPPERSTATUS_COLUMN = "table.crawl.commentwrapperstatuscolumn";
+    public static final String CRAWL_URL_COLUMN = "table.crawl.urlcolumn";
+    public static final String CRAWL_DOMAIN_COLUMN = "table.crawl.hostcolumn";
+    public static final String CRAWL_CLASSIFICATION_COLUMN = "table.crawl.classificationcolumn";
+    public static final String CRAWL_CLASSIFIED_COLUMN = "table.crawl.classifiedcolumn";
 
     public static final String COMMENT_SUFFIXNAME = "table.comment.suffixname";
     public static final String COMMENT_FAMILYS = "table.comment.familys";
-    public static final String COMMENT_COLUMNS = "table.comment.columns"; // 0:user 1:text 2:depth 3:replyto 4:classification 5:url 6:domain
+    public static final String COMMENT_AUTHORNAME_COLUMN = "table.comment.authornamecolumn";
+    public static final String COMMENT_TEXT_COLUMN = "table.comment.textcolumn";
+    public static final String COMMENT_DEPTH_COLUMN = "table.comment.depthcolumn";
+    public static final String COMMENT_REPLYTONAME_COLUMN = "table.comment.replytonamecolumn";
+    public static final String COMMENT_CLASSIFICATION_COLUMN = "table.comment.classificationcolumn";
+    public static final String COMMENT_URL_COLUMN = "table.comment.urlcolumn";
+    public static final String COMMENT_DOMAIN_COLUMN = "table.comment.domaincolumn";
 
     public static final String COMMENT_SECTOR_CLASS = "commentwrapper.website.commentsector.class";
     public static final String COMMENT_BLOCK_CLASS = "commentwrapper.website.commentblock.class";
 
-    Configuration firewallConf;
-
     public WebsiteComment() {
-        firewallConf = FIConfiguration.create();
-        firewallConf.addResource("website-default.xml");
+        conf.addResource("website-default.xml");
     }
 
     public List<Element> selectElement(Element element, String select) {
@@ -75,7 +77,7 @@ public class WebsiteComment {
 
     /* Return candidate of comment sectors */
     public List<Element> commentSector(Document document) {
-        String csClass = firewallConf.get(COMMENT_SECTOR_CLASS);
+        String csClass = conf.get(COMMENT_SECTOR_CLASS);
         String select;
 
         if (csClass.isEmpty()) {
@@ -88,7 +90,7 @@ public class WebsiteComment {
     }
 
     public List<Element> commentBlockTwoOrMore(Element commentSector) {
-        String cbClass = firewallConf.get(COMMENT_BLOCK_CLASS);
+        String cbClass = conf.get(COMMENT_BLOCK_CLASS);
 
         List<Element> cbPredict = selectElement(commentSector, "div[class~=" + cbClass + "],li");
 
@@ -127,7 +129,7 @@ public class WebsiteComment {
     }
 
     public List<Element> commentBlockOne(Element commentSector) {
-        String cbClass = firewallConf.get(COMMENT_BLOCK_CLASS);
+        String cbClass = conf.get(COMMENT_BLOCK_CLASS);
 
         List<Element> cbPredict = selectElement(commentSector, "div[class~=" + cbClass + "],li");
 
@@ -281,33 +283,30 @@ public class WebsiteComment {
 
     /* Run on SPARK */
     public void run(JavaSparkContext jsc, String prefixTableName) throws IOException {
-        String crawlTableName = prefixTableName + firewallConf.get(CRAWL_SUFFIXNAME);
-        String[] crawlColumns = firewallConf.getStrings(CRAWL_COLUMNS);
-        List<String> crawlColumnsList = Arrays.asList(crawlColumns);
-        String crawlHtmlColumn = crawlColumns[0];
-        String crawlCommentStatusColumn = crawlColumns[1];
-        String crawlUrlColumn = crawlColumns[2];
-        String crawlDomainColumn = crawlColumns[3];
-        String crawlClassificationColumn = crawlColumns[4];
-        String crawlClassifiedColumn = crawlColumns[5];
+        String crawlTableName = prefixTableName + conf.get(NAME_DELIMITER) + conf.get(CRAWL_SUFFIXNAME);
+        String crawlHtmlColumn = conf.get(CRAWL_HTML_COLUMN);
+        String crawlCommentWrapperStatusColumn = conf.get(CRAWL_COMMENTWRAPPERSTATUS_COLUMN);
+        String crawlUrlColumn = conf.get(CRAWL_URL_COLUMN);
+        String crawlDomainColumn = conf.get(CRAWL_DOMAIN_COLUMN);
+        String crawlClassificationColumn = conf.get(CRAWL_CLASSIFICATION_COLUMN);
+        String crawlClassifiedColumn = conf.get(CRAWL_CLASSIFIED_COLUMN);
+        List<String> crawlColumnsList = Arrays.asList(crawlHtmlColumn, crawlUrlColumn, crawlDomainColumn, crawlClassificationColumn);
 
-        String commentTableName = prefixTableName + firewallConf.get(COMMENT_SUFFIXNAME);
-        String[] commentFamilys = firewallConf.getStrings(COMMENT_FAMILYS);
-        List<String> commentFamilysList = Arrays.asList(commentFamilys);
-        String[] commentColumns = firewallConf.getStrings(COMMENT_COLUMNS);
-        String commentUserColumn = commentColumns[0];
-        String commentTextColumn = commentColumns[1];
-        String commentDepthColumn = commentColumns[2];
-        String commentReplytoColumn = commentColumns[3];
-        String commentClassificationColumn = commentColumns[4];
-        String commentUrlColumn = commentColumns[5];
-        String commentDomainColumn = commentColumns[6];
+        String commentTableName = prefixTableName + conf.get(NAME_DELIMITER) + conf.get(COMMENT_SUFFIXNAME);
+        List<String> commentFamilys = Arrays.asList(conf.getStrings(COMMENT_FAMILYS));
+        String commentAuthorNameColumn = conf.get(COMMENT_AUTHORNAME_COLUMN);
+        String commentTextColumn = conf.get(COMMENT_TEXT_COLUMN);
+        String commentDepthColumn = conf.get(COMMENT_DEPTH_COLUMN);
+        String commentReplytoNameColumn = conf.get(COMMENT_REPLYTONAME_COLUMN);
+        String commentClassificationColumn = conf.get(COMMENT_CLASSIFICATION_COLUMN);
+        String commentUrlColumn = conf.get(COMMENT_URL_COLUMN);
+        String commentDomainColumn = conf.get(COMMENT_DOMAIN_COLUMN);
 
         /* Create comment table */
-        HBaseTableUtils.createTable(commentTableName, commentFamilysList);
+        HBaseTableUtils.createTable(commentTableName, commentFamilys);
 
         /* Get data from crawl table */
-        JavaPairRDD<String, Map<String, String>> inComment = new HBaseRead().doRead(jsc, crawlTableName, crawlClassifiedColumn, crawlCommentStatusColumn, crawlColumnsList);
+        JavaPairRDD<String, Map<String, String>> inComment = new HBaseRead().doRead(jsc, crawlTableName, crawlClassifiedColumn, crawlCommentWrapperStatusColumn, crawlColumnsList);
 
         /* Get all comment */
         JavaPairRDD<String, Map<String, String>> outComment = inComment
@@ -316,10 +315,10 @@ public class WebsiteComment {
                             .parallelStream()
                             .map(comment -> {
                                 Map<String, String> commentFormat = new HashMap<>();
-                                commentFormat.put(commentUserColumn, comment.get("user"));
+                                commentFormat.put(commentAuthorNameColumn, comment.get("user"));
                                 commentFormat.put(commentTextColumn, comment.get("text"));
                                 commentFormat.put(commentDepthColumn, comment.get("depth"));
-                                commentFormat.put(commentReplytoColumn, comment.get("replyto"));
+                                commentFormat.put(commentReplytoNameColumn, comment.get("replyto"));
                                 commentFormat.put(commentUrlColumn, comment.get(crawlUrlColumn));
                                 commentFormat.put(commentDomainColumn, comment.get(crawlDomainColumn));
                                 commentFormat.put(commentClassificationColumn, comment.get(crawlClassificationColumn));
@@ -332,13 +331,13 @@ public class WebsiteComment {
                 });
 
         /* Set comment_status to true (crawl table) */
-        String statusTrue = firewallConf.get(STATUSTRUE);
+        String statusTrue = conf.get(STATUSTRUE);
         JavaPairRDD<String, String> updateStatus = inComment.mapToPair(row -> new Tuple2<>(row._1, statusTrue));
 
         /* Save ouput comment to comment table */
-        new HBaseWrite().save(commentTableName, outComment, commentFamilysList);
+        new HBaseWrite().save(commentTableName, outComment, commentFamilys);
 
         /* Update crawl table */
-        new HBaseWrite().save(crawlTableName, updateStatus, crawlCommentStatusColumn);
+        new HBaseWrite().save(crawlTableName, updateStatus, crawlCommentWrapperStatusColumn);
     }
 }
